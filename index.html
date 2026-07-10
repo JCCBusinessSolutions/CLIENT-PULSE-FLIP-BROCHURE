@@ -1062,15 +1062,16 @@
 })();
 
 /* ============================================================
-   LIVE FEEDBACK — loads approved reviews from the standalone
-   feedback backend (see Client_Pulse_Feedback_Code.gs) and lets
-   any visitor submit their own. New submissions land unapproved
-   and only appear here after being ticked "Approved" in the
-   Feedback sheet — see that file's header comment for setup.
+   LIVE FEEDBACK — loads approved reviews from the same
+   CLIENT_PULSE_SHEET_API backend the access gate uses (see its
+   "LIVE FEEDBACK" section) and lets any visitor submit their own.
+   New submissions land unapproved and only appear here after
+   being ticked "Approved" in the Feedback tab of that same Sheet.
    ============================================================ */
 (function(){
-  // Paste your deployed Web App URL here after setting up
-  // Client_Pulse_Feedback_Code.gs (see its header comment).
+  // Same Web App URL as CLIENT_PULSE_SHEET_API in the main app's
+  // gate — this feature lives on that same deployment, not a
+  // separate one.
   const FEEDBACK_API_URL = 'PASTE_YOUR_FEEDBACK_WEB_APP_URL_HERE';
 
   function escapeHtml(str){
