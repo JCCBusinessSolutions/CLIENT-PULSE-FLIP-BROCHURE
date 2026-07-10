@@ -401,6 +401,39 @@
     opacity: 0.75;
   }
 
+  .back-cta-links{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+  }
+  .back-cta-btn{
+    display: inline-block;
+    width: 100%;
+    max-width: 260px;
+    box-sizing: border-box;
+    text-align: center;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 13px 20px;
+    border-radius: 100px;
+    background: #fff;
+    color: var(--navy-deep, #062240);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .back-cta-btn:hover{ transform: translateY(-1px); opacity: 0.92; }
+  .back-cta-btn-outline{
+    background: #fff;
+    border: 1.5px solid rgba(255,255,255,0.55);
+    color: var(--navy-deep, #062240);
+  }
+  .back-cta-tag{ display: block; }
+
   /* ===== BACK PAGE ===== */
   .pf-back{
     flex: 1;
@@ -956,8 +989,14 @@
     <h2 class="back-title">Your book of business<br>deserves this.</h2>
     <p class="back-sub">Client Pulse is built and maintained by JCC Business Solutions for financial advisors across the Philippines.</p>
     <div class="user-count-badge" id="userCountBadgeBack"><span class="ucb-headline">Loading advisor count&hellip;</span></div>
+    <div class="back-cta-links">
+      <a class="back-cta-btn" href="https://jccclientpulse.online/" target="_blank" rel="noopener">OPEN CLIENT PULSE</a>
+      <a class="back-cta-btn back-cta-btn-outline" href="https://jccbusinesssolutions.github.io/JCCPAYMENTS/" target="_blank" rel="noopener">
+        <span class="back-cta-tag">GET ONE. PAY ONCE. PAY NOW.</span>
+      </a>
+    </div>
     <div class="back-rule"></div>
-    <div class="back-footer">JCC Business Solutions · Client Pulse</div>
+    <div class="back-footer">JCC BUSINESS SOLUTIONS | ALL RIGHTS RESERVED 2026</div>
   </div>
 </template>
 
