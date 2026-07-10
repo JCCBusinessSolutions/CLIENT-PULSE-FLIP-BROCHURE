@@ -299,6 +299,20 @@
     margin-top: 1px;
   }
 
+  /* ===== DATA PRIVACY comparison rows ===== */
+  .privacy-compare{ display: flex; flex-direction: column; gap: 10px; margin: 4px 0 18px; }
+  .privacy-row{
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+  }
+  .privacy-row-you{ background: rgba(45,140,90,0.08); border-color: rgba(45,140,90,0.3); }
+  .privacy-row-dev{ background: rgba(201,60,60,0.06); border-color: rgba(201,60,60,0.25); }
+  .privacy-icon{ font-size: 22px; flex-shrink: 0; width: 30px; text-align: center; }
+  .privacy-who{ font-size: 12.5px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+  .privacy-what{ font-size: 11px; color: var(--ink-soft); line-height: 1.4; }
+
   /* ===== COVER PAGE ===== */
   .pf-cover{
     flex: 1;
@@ -938,6 +952,35 @@
   </div>
 </template>
 
+<template id="tpl-data-privacy">
+  <div class="eyebrow">Data Privacy</div>
+  <h2 class="headline">Your clients' data.<br>Yours alone.</h2>
+  <p class="sub">Client Pulse doesn't have one big shared database. Every advisor gets their own private Google Sheet, inside their own Google account — here's what that actually means for you.</p>
+
+  <div class="privacy-compare">
+    <div class="privacy-row privacy-row-you">
+      <div class="privacy-icon">🔒</div>
+      <div class="privacy-text">
+        <div class="privacy-who">Your Google Sheet</div>
+        <div class="privacy-what">Lives in your own Google Drive. Only you can open it.</div>
+      </div>
+    </div>
+    <div class="privacy-row privacy-row-dev">
+      <div class="privacy-icon">🚫</div>
+      <div class="privacy-text">
+        <div class="privacy-who">JCC Business Solutions (the developer)</div>
+        <div class="privacy-what">No login, no copy, no way to see your client list.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature-list">
+    <div class="feature-row"><span class="feature-check">&#10003;</span>Your client list is stored in a Google Sheet you own, not a shared server</div>
+    <div class="feature-row"><span class="feature-check">&#10003;</span>The app runs under your own Google account, so everything stays with you</div>
+    <div class="feature-row"><span class="feature-check">&#10003;</span>Your login password is set by you, and only you — no one else can see it</div>
+  </div>
+</template>
+
 <template id="tpl-ratings">
   <div class="eyebrow">Trusted by Advisors</div>
   <h2 class="headline">Built from<br>real feedback.</h2>
@@ -1021,6 +1064,7 @@
     'tpl-fund-value',
     'tpl-product-analytics',
     'tpl-broadcast',
+    'tpl-data-privacy',
     'tpl-ratings',
     'tpl-back'
   ];
