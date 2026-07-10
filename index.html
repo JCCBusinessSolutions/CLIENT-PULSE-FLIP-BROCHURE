@@ -83,6 +83,14 @@
     transition: transform 0.85s cubic-bezier(0.645, 0.045, 0.355, 1);
     backface-visibility: hidden;
   }
+  /* Applied only to the page currently at rest (not mid-flip) — see
+     the comment in render() for why this exists. A 0deg-rotated page
+     looks identical either way, but this is what lets iOS Safari
+     actually scroll its content. */
+  .page.settled{
+    transform-style: flat;
+    backface-visibility: visible;
+  }
 
   .page-face{
     position: absolute; inset: 0;
@@ -991,24 +999,9 @@
   <h2 class="headline">Built from<br>real feedback.</h2>
   <p class="sub">Every feature on these pages started as a real problem an advisor ran into on a real Monday morning.</p>
   <div class="ratings-summary">
-    <div class="ratings-score">4.9</div>
-    <div class="ratings-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-    <div class="ratings-count">based on advisor feedback</div>
-  </div>
-  <div class="review-card">
-    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-    <p class="review-text">"I schedule my broadcasts the night before and go to bed. They just... send. That's the whole review."</p>
-    <div class="review-name">— Financial Advisor, Laguna</div>
-  </div>
-  <div class="review-card">
-    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-    <p class="review-text">"Product Analytics showed me half my book was on one plan. That one chart changed what I pitch now."</p>
-    <div class="review-name">— Financial Advisor, Metro Manila</div>
-  </div>
-  <div class="review-card">
-    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-    <p class="review-text">"Due reminders and birthday greetings run themselves now, and I still control exactly who's on the list. Best of both."</p>
-    <div class="review-name">— Sales Manager, Metro Cebu</div>
+    <div class="ratings-score" id="ratingsScore">&mdash;</div>
+    <div class="ratings-stars" id="ratingsStars">&#9734;&#9734;&#9734;&#9734;&#9734;</div>
+    <div class="ratings-count" id="ratingsCount">based on advisor feedback</div>
   </div>
 
   <div class="fb-section-label">From other advisors</div>
@@ -1082,6 +1075,7 @@
   const hint = document.getElementById('hint');
 
   let currentLeaf = 0; // which leaf is "on top" (0 = cover showing)
+  let settledTimer = null;
   const totalLeaves = PAGE_IDS.length;
   const leafEls = [];
 
@@ -1143,6 +1137,11 @@
   });
 
   function render(){
+    // A page mid-transition needs its full 3D context (preserve-3d /
+    // backface-visibility) for the flip animation to render correctly —
+    // strip the "settled" flag from everyone before changing state.
+    leafEls.forEach(el => el.classList.remove('settled'));
+
     leafEls.forEach((el, i) => {
       el.classList.toggle('flipped', i < currentLeaf);
       // Keep z-index sensible so flipped (now on the left, face-down)
@@ -1155,6 +1154,23 @@
     prevBtn.disabled = currentLeaf === 0;
     nextBtn.disabled = currentLeaf === totalLeaves - 1;
     pageIndicator.textContent = (currentLeaf + 1) + ' / ' + totalLeaves;
+
+    // Once the .85s flip transition has fully finished, drop the
+    // now-front-facing page out of the 3D transform context entirely.
+    // A page at rest (0deg rotation) renders identically whether or
+    // not it's inside that context — but iOS Safari has a real,
+    // well-documented bug where it refuses to let you scroll inside
+    // any element that's a descendant of something with
+    // backface-visibility:hidden / preserve-3d. This is what was
+    // actually breaking scrolling on longer pages (like the feedback
+    // page) on iPhone, no matter how the scroll CSS itself was tuned.
+    clearTimeout(settledTimer);
+    const activeLeaf = currentLeaf;
+    settledTimer = setTimeout(() => {
+      if (activeLeaf === currentLeaf && leafEls[activeLeaf]){
+        leafEls[activeLeaf].classList.add('settled');
+      }
+    }, 900);
   }
 
   function goToLeaf(target){
@@ -1238,6 +1254,14 @@
       const res = await fetch(FEEDBACK_API_URL + '?action=getApprovedFeedback');
       const data = await res.json();
       const list = (data && data.feedback) || [];
+
+      // Newest first — the backend already returns them this way, but
+      // sorting explicitly here is a safety net in case that ever
+      // changes, rather than silently relying on array order.
+      list.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+
+      updateRatingsSummary(list);
+
       if (list.length === 0){
         container.innerHTML = '<div class="fb-empty-note">Be the first to leave feedback below.</div>';
         return;
@@ -1250,8 +1274,32 @@
         + '</div>'
       )).join('');
     }catch(e){
+      updateRatingsSummary([]);
       container.innerHTML = '<div class="fb-empty-note">Couldn\u2019t load feedback right now.</div>';
     }
+  }
+
+  // Drives the 4.9-style summary at the top of the page from the real
+  // submitted ratings — no more hardcoded number. Shows an honest
+  // "No ratings yet" state instead of faking a score when the list is
+  // empty, rather than defaulting to something misleading like 5.0.
+  function updateRatingsSummary(list){
+    const scoreEl = document.getElementById('ratingsScore');
+    const starsEl = document.getElementById('ratingsStars');
+    const countEl = document.getElementById('ratingsCount');
+    if (!scoreEl || !starsEl || !countEl) return;
+
+    if (!list || list.length === 0){
+      scoreEl.textContent = '\u2014';
+      starsEl.innerHTML = starsHtml(0);
+      countEl.textContent = 'No ratings yet \u2014 be the first';
+      return;
+    }
+    const sum = list.reduce((total, item) => total + (Number(item.stars) || 0), 0);
+    const avg = sum / list.length;
+    scoreEl.textContent = avg.toFixed(1);
+    starsEl.innerHTML = starsHtml(avg);
+    countEl.textContent = 'based on ' + list.length + ' advisor' + (list.length === 1 ? '' : 's') + '\u2019 feedback';
   }
 
   function setupStarPicker(){
